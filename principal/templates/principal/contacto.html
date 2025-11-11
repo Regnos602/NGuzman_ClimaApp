@@ -1,0 +1,56 @@
+{% extends "principal/base.html" %}
+{% block title %}Contacto{% endblock %}
+
+{% block content %}
+<div class="p-4 bg-white rounded shadow-sm">
+  <h2 class="h4 mb-3">Formulario de contacto</h2>
+
+  {% if enviado %}
+    <div class="alert alert-success">¡Gracias por tu mensaje! Lo recibimos correctamente.</div>
+  {% endif %}
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label class="form-label">{{ form.nombre.label }}</label>
+      <input
+        type="text"
+        name="{{ form.nombre.name }}"
+        value="{{ form.nombre.value|default_if_none:'' }}"
+        class="form-control {% if form.nombre.errors %}is-invalid{% endif %}"
+        placeholder="{{ form.nombre.field.widget.attrs.placeholder }}">
+      {% if form.nombre.errors %}
+        <div class="invalid-feedback">{{ form.nombre.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">{{ form.email.label }}</label>
+      <input
+        type="email"
+        name="{{ form.email.name }}"
+        value="{{ form.email.value|default_if_none:'' }}"
+        class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+        placeholder="{{ form.email.field.widget.attrs.placeholder }}">
+      {% if form.email.errors %}
+        <div class="invalid-feedback">{{ form.email.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">{{ form.mensaje.label }}</label>
+      <textarea
+        name="{{ form.mensaje.name }}"
+        class="form-control {% if form.mensaje.errors %}is-invalid{% endif %}"
+        rows="6"
+        placeholder="{{ form.mensaje.field.widget.attrs.placeholder }}">{{ form.mensaje.value|default_if_none:'' }}</textarea>
+      {% if form.mensaje.errors %}
+        <div class="invalid-feedback">{{ form.mensaje.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Enviar</button>
+  </form>
+</div>
+{% endblock %}
