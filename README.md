@@ -1,7 +1,7 @@
 # ClimaApp – Aplicación Web en Django  
 *Autor:* Ignacio Guzmán  
 *Carrera:* Técnico en Programación, Último año – Universidad Tecnológica Nacional (Argentina)  
-*Actualmente en:* FASE (Soporte Técnico y Sistemas)  
+*Actualmente en:* FASE (Programacion y soporte tecnico)  
 
 ---
 
