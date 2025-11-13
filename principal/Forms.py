@@ -17,6 +17,7 @@ class ContactoForm(forms.ModelForm): #Clase de formularios para contacto
                 "class": "form-control",
                 "placeholder": "Nombre completo",
             }),
+            
             "email": forms.EmailInput(attrs={
                 "class": "form-control",
                 "placeholder": "usuario@ejemplo.com",
@@ -41,11 +42,7 @@ class ContactoForm(forms.ModelForm): #Clase de formularios para contacto
             },
         }
 
-    def clean_email(self): #Funcion de validación extra personalizada para emails
-        email = self.cleaned_data["email"]
-        if not email.endswith(".com"):
-            raise forms.ValidationError("Solo se aceptan correos que terminen en .com")
-        return email
+
 
 class ClimaForm(forms.Form): #Clase de formularios para poder hacer busqueda del tiempo en la ubicacion que el usuario otorgue
     ubicacion = forms.CharField(

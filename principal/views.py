@@ -4,10 +4,17 @@ from django.contrib import messages
 import requests
 
 
-
 def inicio(request):
+    """Funcion de inicio en el cual se encuentran las distintas validaciones, busquedas y respuestas de la aplicacion de clima.
+
+    Args:
+        request (HttpRequest): Peticion http recibida desde el navegador. Puede contener datos GET enviados por el form del clima.
+
+    Returns:
+        HttpResponse: Pagina HTML renderizada que contiene formulario de busqueda, resultados del clima con sus validaciones.
+    """
     contexto = {"nombre": "None"}    
-    datos, errores = None, None #Inicializaciones
+    datos, errores = None, None 
 
     if request.method == "GET" and (request.GET.get("ubicacion") or request.GET.get("lat")): #Busqueda de la ubicacion ingresada por el usuario
         form_clima = ClimaForm(request.GET)
@@ -66,10 +73,27 @@ def inicio(request):
     contexto.update({"form_clima": form_clima, "clima": datos, "clima_error": errores})
     return render(request, "principal/index.html", contexto)
 
-def acerca(request): #Acerca de la pagina
+def acerca(request):
+    """Vista informativa de la pagina, renderiza la seccion de "Acerca".
+
+    Args:
+        request (HttpRequest): Peticion HTTP realizada por el usuario al ingresar a la pagina.
+
+    Returns:
+        HttpResponse: Pagina HTML con la descripcion informativa del proyecto ReClima.
+    """
     return render(request, "principal/acerca.html")
 
-def contacto(request): #Contacto de la pagina
+def contacto(request):
+    """Vista encargada de gestionar el formulario de contacto del sitio.
+
+    Args:
+        request (HttpRequest): peticion HTTP realizada por el usuario. Puede contener 
+        informacion enviada mediante POST si el usuario completo el formulario.
+
+    Returns:
+        HttpResponse: Pagina ya renderizada con el formulario de contacto y las validaciones de respuestas.
+    """
     if request.method == "POST":
         form = ContactoForm(request.POST) #Crea el formulario con los datos ingresados
         if form.is_valid(): 
@@ -82,7 +106,7 @@ def contacto(request): #Contacto de la pagina
     return render(request, "principal/contacto.html", {"form": form})
 
 
-WMO = { #Libreria de distintas opciones de texto dependiendo el numero que la API nos de
+WMO = { #Diccionario de distintas opciones de texto dependiendo el numero que la API nos de
     0: "Despejado", 1: "Mayormente despejado", 2: "Parcialmente nublado", 3: "Nublado",
     45: "Niebla", 48: "Niebla con escarcha",
     51: "Llovizna débil", 53: "Llovizna", 55: "Llovizna intensa",
