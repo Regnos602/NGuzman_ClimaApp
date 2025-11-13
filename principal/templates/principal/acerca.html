@@ -2,10 +2,99 @@
 {% block title %}Acerca{% endblock %}
 
 {% block content %}
-  <div class="p-4 bg-white rounded shadow-sm">
-    <h2 class="h4">Acerca</h2>
-    <p>Esta es una página web de practica para el uso de APIs, el framework
-       de django y las distintas caracteristicas olvidadas de python
-    </p>
-  </div>
+
+<style>
+  .about-card {
+    border-radius: 1rem;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+    border: none;
+    padding: 2rem;
+  }
+
+  .about-title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+  }
+
+  .about-section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-top: 1.5rem;
+    margin-bottom: .5rem;
+  }
+
+  .about-list li {
+    margin-bottom: .4rem;
+  }
+
+  .about-subtitle {
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+</style>
+
+<div class="about-card bg-white">
+
+  <h1 class="about-title">🌤️ ClimaApp – Aplicación Web en Django</h1>
+
+  <p><span class="about-subtitle">Autor:</span> Ignacio Guzmán</p>
+  <p><span class="about-subtitle">Carrera:</span> Técnico en Programación (UTN – Argentina), último año.</p>
+  <p><span class="about-subtitle">Actualmente en:</span> FASE – Soporte Técnico y Sistemas.</p>
+
+  <hr>
+
+  <h2 class="about-section-title">🧭 Visión general</h2>
+
+  <p>
+    ClimaApp es una aplicación web desarrollada con el framework <strong>Django</strong> que combina dos funcionalidades centrales:
+  </p>
+
+  <ol>
+    <li>
+      Consulta de clima usando <strong>Open-Meteo API</strong>, ofreciendo datos meteorológicos actualizados.
+    </li>
+    <li>
+      Formulario de contacto con almacenamiento en base de datos y envío de emails 
+      desde el panel de administración nativo de Django.
+    </li>
+  </ol>
+
+  <p>
+    El objetivo es integrar una herramienta dinámica (el clima) con una parte administrativa (contacto),
+    demostrando manejo de APIs externas, persistencia de datos y envío de correos.
+  </p>
+
+  <hr>
+
+  <h2 class="about-section-title">🚀 Funcionalidades</h2>
+
+  <ul class="about-list">
+    <li>Consulta detallada del clima para cualquier ubicación.</li>
+    <li>Autocompletado inteligente de ciudades mediante Open-Meteo Geocoding.</li>
+    <li>Pronóstico extendido de 7 días.</li>
+    <li>Formulario de contacto con guardado automático en la base de datos.</li>
+    <li>Envío de correo automático desde Django Admin al recibir un mensaje.</li>
+    <li>Interfaz limpia y diseño responsivo basado en Bootstrap.</li>
+  </ul>
+
+  <hr>
+
+
+  <h2 class="about-section-title">🧱 Tecnologías utilizadas</h2>
+
+  <ul class="about-list">
+    <li><strong>Lenguaje:</strong> Python 3.x</li>
+    <li><strong>Framework:</strong> Django</li>
+    <li><strong>Base de datos:</strong> SQLite (modo desarrollo)</li>
+    <li><strong>API de clima:</strong> Open-Meteo API</li>
+    <li><strong>Frontend:</strong> HTML5, CSS3 y templating de Django</li>
+    <li><strong>Correo:</strong> Sistema nativo de Django (send_mail)</li>
+  </ul>
+
+  <hr>
+
+
+</div>
+
 {% endblock %}
