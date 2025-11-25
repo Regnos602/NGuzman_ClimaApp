@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect
 from .Forms import ContactoForm,ClimaForm
 from django.contrib import messages
+from datetime import datetime
 import requests
 
 
@@ -13,64 +14,127 @@ def inicio(request):
     Returns:
         HttpResponse: Pagina HTML renderizada que contiene formulario de busqueda, resultados del clima con sus validaciones.
     """
-    contexto = {"nombre": "None"}    
-    datos, errores = None, None 
 
-    if request.method == "GET" and (request.GET.get("ubicacion") or request.GET.get("lat")): #Busqueda de la ubicacion ingresada por el usuario
+    # Contexto base
+    contexto = {"nombre": "None"}
+    datos = None
+    errores = None
+
+    if request.method == "GET" and (
+        request.GET.get("ubicacion") or request.GET.get("lat")
+    ):
         form_clima = ClimaForm(request.GET)
-        if form_clima.is_valid(): #Validaciones de formulario
+
+        if form_clima.is_valid():
+            # Tomamos datos del formulario
             lat = form_clima.cleaned_data.get("lat")
             lon = form_clima.cleaned_data.get("lon")
-            q   = form_clima.cleaned_data["ubicacion"].strip()
+            q = form_clima.cleaned_data.get("ubicacion").strip()
 
-            if lat is not None and lon is not None: #coordenadas ya traidas (usuario selecciono una opcion)
-                lugar = q 
-            else: #coordenadas buscadas (usuario no selecciono una opcion)
+            # Si NO tenemos lat/lon (porque el usuario escribió a mano la ciudad),
+            # usamos la API de geocoding de Open-Meteo para buscarlas
+            if lat is None or lon is None:
                 geo = requests.get(
                     "https://geocoding-api.open-meteo.com/v1/search",
-                    params={"name": q, "count": 1, "language": "es"},
-                    timeout=7
+                    params={
+                        "name": q,
+                        "count": 1,
+                        "language": "es",
+                    },
+                    timeout=7,
                 ).json()
-                if not geo.get("results"): #no resultados a la opcion dada (mensaje de error)
-                    errores = f"No encontré: {q}. Probá con país/código (ej: Córdoba, AR)."
-                    contexto.update({"form_clima": form_clima, "clima": None, "clima_error": errores})
-                r0 = geo["results"][0] #si hubo resultados, toma las coordenadas
-                lat, lon = r0["latitude"], r0["longitude"]
-                lugar = f'{r0["name"]}, {r0.get("country_code","")}'
 
-            meteo = requests.get( #llamada a la api del pronostico  
+                if not geo.get("results"):
+                    errores = f"No encontré: {q}. Probá con país/código (ej: Córdoba, AR)."
+                    contexto.update({
+                        "form_clima": form_clima,
+                        "clima": None,
+                        "clima_error": errores,
+                    })
+                    return render(request, "principal/index.html", contexto)
+
+                r0 = geo["results"][0]
+                lat = r0["latitude"]
+                lon = r0["longitude"]
+                lugar = f'{r0["name"]}, {r0.get("country_code","")}'
+            else:
+                # Si ya teníamos lat/lon desde la sugerencia
+                lugar = q
+
+            #Llamada a la API del pronóstico 
+            meteo = requests.get(
                 "https://api.open-meteo.com/v1/forecast",
                 params={
-                    "latitude": lat, "longitude": lon,
+                    "latitude": lat,
+                    "longitude": lon,
                     "current": "temperature_2m,weather_code",
                     "daily": "temperature_2m_max,temperature_2m_min,weather_code",
-                    "timezone": "auto", "forecast_days": 7
+                    "timezone": "auto",
+                    "forecast_days": 7,
                 },
-                timeout=7
+                timeout=7,
             ).json()
 
-            current = meteo.get("current", {}) #tiempo actual
-            daily = meteo.get("daily", {}) #tiempo diario
+            current = meteo.get("current", {})
+            daily = meteo.get("daily", {})
+
+            tiempos = daily.get("time", [])
+            codigos = daily.get("weather_code", [])
+            tmaxs = daily.get("temperature_2m_max", [])
+            tmins = daily.get("temperature_2m_min", [])
+
             pronostico = []
-            for i, fecha in enumerate(daily.get("time", [])):
-                code = daily["weather_code"][i]
+            for i, fecha in enumerate(tiempos):
+                if i >= len(codigos) or i >= len(tmaxs) or i >= len(tmins):
+                    continue
+
+                code = codigos[i]
+                tmax = tmaxs[i]
+                tmin = tmins[i]
+
+                try:
+                    fecha_date = datetime.strptime(fecha, "%Y-%m-%d").date()
+                    dia_semana = DIAS_SEMANA[fecha_date.weekday()]
+                except Exception:
+                    dia_semana = ""
+
                 pronostico.append({
                     "fecha": fecha,
-                    "tmax": daily["temperature_2m_max"][i],
-                    "tmin": daily["temperature_2m_min"][i],
-                    "cond": WMO.get(code, f"Código {code}")
+                    "dia": dia_semana,
+                    "tmax": tmax,
+                    "tmin": tmin,
+                    "cond": WMO.get(code, f"Código {code}"),
                 })
 
+            # Diccionario que se manda al template
             datos = {
                 "lugar": lugar,
                 "temp_actual": current.get("temperature_2m"),
-                "cond_actual": WMO.get(current.get("weather_code", -1), "—"),
-                "pronostico": pronostico
+                "cond_actual": WMO.get(current.get("weather_code"), ""),
+                "pronostico": pronostico,
             }
-    else:
-        form_clima = ClimaForm()
 
-    contexto.update({"form_clima": form_clima, "clima": datos, "clima_error": errores})
+            contexto.update({
+                "form_clima": form_clima,
+                "clima": datos,
+                "clima_error": errores,
+            })
+        else:
+            # Formulario no válido, lo devolvemos con errores
+            contexto.update({
+                "form_clima": form_clima,
+                "clima": None,
+                "clima_error": "Revisá los datos del formulario.",
+            })
+
+    else:
+        # Primera carga de la página o sin parámetros: formulario vacío
+        form_clima = ClimaForm()
+        contexto.update({
+            "form_clima": form_clima,
+            "clima": None,
+            "clima_error": None,
+        })
     return render(request, "principal/index.html", contexto)
 
 def acerca(request):
@@ -115,3 +179,5 @@ WMO = { #Diccionario de distintas opciones de texto dependiendo el numero que la
     80: "Chaparrón débil", 81: "Chaparrón", 82: "Chaparrón fuerte",
     95: "Tormenta", 96: "Tormenta con granizo", 99: "Tormenta fuerte con granizo"
 }
+
+DIAS_SEMANA = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]

@@ -139,7 +139,10 @@
             <tbody>
               {% for d in clima.pronostico %}
                 <tr>
-                  <td>{{ d.fecha }}</td>
+                  <td>
+                    {{ d.fecha }}
+                    <span class="text-muted small">({{ d.dia }})</span>
+                  </td>
                   <td>{{ d.cond }}</td>
                   <td class="text-end">{{ d.tmax }}</td>
                   <td class="text-end">{{ d.tmin }}</td>
